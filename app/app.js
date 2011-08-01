@@ -47,7 +47,8 @@ mailchimp.on('fetch', function() {
 });
 mailchimp.on('uniqueTags', function(utags) {
   console.log('mailchimp uniqueTags done!');
-  mailchimp.update(utags);
+  mailchimp.updateVars(utags);
+  mailchimp.update();
 });
 mailchimp.on('update', function() {
   console.log('mailchimp update done!');
