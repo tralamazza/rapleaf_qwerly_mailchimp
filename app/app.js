@@ -20,39 +20,56 @@ var config = require('./config'),
   Qwerly = require('./qwerly'),
   RapLeaf = require('./rapleaf');
 
+
+// check keys
+['mailchimp', 'qwerly', 'rapleaf'].forEach(function(i) {
+  if (config[i].key == '')
+    return 'Missing ' + i + ' API key. Please change `config.js`';
+});
+
 // globals
 var db = new mongodb.db(config.mongodb.host, config.mongodb.port, config.mongodb.db);
   mailchimp = new Mailchimp(config, db);
   qwerly = new Qwerly(config, db),
   rapleaf = new RapLeaf(config, db);
 
-var scrub_done = 2; // querly and rapleaf
+
+var scrub_done = 2; // querly and rapleaf, last to complete fires the update
 
 // register events
 mailchimp.on('error', function(err) {
   console.log('|mailchimp| ' + err);
 });
-mailchimp.on('done', function() {
-  console.log('mailchimp done!');
+mailchimp.on('fetch', function() {
+  console.log('mailchimp fetch done!');
   qwerly.fetch();
   rapleaf.fetch();
+});
+mailchimp.on('uniqueTags', function(utags) {
+  console.log('mailchimp uniqueTags done!');
+  mailchimp.update(utags);
+});
+mailchimp.on('update', function() {
+  console.log('mailchimp update done!');
 });
 
 qwerly.on('error', function(err) {
   console.log('|qwerly| ' + err);
 });
-qwerly.on('done', function() {
-  console.log('qwerly done!');
-  if (--scrub_done == 0) mailchimp.update();
+qwerly.on('fetch', function() {
+  console.log('qwerly fetch done!');
+  if (--scrub_done == 0) mailchimp.uniqueTags();
 });
 
 rapleaf.on('error', function(err) {
   console.log('|rapleaf| ' + err);
 });
-rapleaf.on('done', function() {
-  console.log('rapleaf done!');
-  if (--scrub_done == 0) mailchimp.update();
+rapleaf.on('fetch', function() {
+  console.log('rapleaf fetch done!');
+  if (--scrub_done == 0) mailchimp.uniqueTags();
 });
 
-// Go!
-mailchimp.fetch();
+// ### Starts here ###
+db[config.mongodb.collection].drop(function(err) { // clear our cache db
+  mailchimp.fetch(); // go!
+});
