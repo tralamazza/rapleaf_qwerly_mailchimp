@@ -11,9 +11,9 @@ function Qwerly(config, db) {
 
 Qwerly.prototype.__proto__ = EventEmitter.prototype;
 
-Qwerly.prototype.run = function() {
+Qwerly.prototype.fetch = function() {
   var self = this;
-  self.members.find().toArray(function(err, docs) {
+  self.members.find({}, { email: 1}).toArray(function(err, docs) {
     if (err) throw '[mongodb] Error fetching members. ' + err;
 
     self.count = docs.length;

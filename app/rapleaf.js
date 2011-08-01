@@ -10,9 +10,9 @@ function RapLeaf(config, db) {
 
 RapLeaf.prototype.__proto__ = EventEmitter.prototype;
 
-RapLeaf.prototype.run = function() {
+RapLeaf.prototype.fetch = function() {
   var self = this;
-  self.members.find().toArray(function(err, docs) {
+  self.members.find({}, { email: 1 }).toArray(function(err, docs) {
     if (err) throw '[mongodb] Error fetching members. ' + err;
 
     var arr_emails = []

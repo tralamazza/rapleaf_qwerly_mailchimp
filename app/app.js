@@ -1,7 +1,7 @@
 /*
  * Author: Daniel Tralamazza <tralamazza@gmail.com>
  *
- * ODesk job: https://www.odesk.com/jobs/~~efe1487b37957df1
+ * Got the idea from this ODesk job: https://www.odesk.com/jobs/~~efe1487b37957df1
  * 
  * Description:
  *   1. Pull list from mailchimp
@@ -26,14 +26,16 @@ var db = new mongodb.db(config.mongodb.host, config.mongodb.port, config.mongodb
   qwerly = new Qwerly(config, db),
   rapleaf = new RapLeaf(config, db);
 
+var scrub_done = 2; // querly and rapleaf
+
 // register events
 mailchimp.on('error', function(err) {
   console.log('|mailchimp| ' + err);
 });
 mailchimp.on('done', function() {
   console.log('mailchimp done!');
-  qwerly.run();
-  rapleaf.run();
+  qwerly.fetch();
+  rapleaf.fetch();
 });
 
 qwerly.on('error', function(err) {
@@ -41,6 +43,7 @@ qwerly.on('error', function(err) {
 });
 qwerly.on('done', function() {
   console.log('qwerly done!');
+  if (--scrub_done == 0) mailchimp.update();
 });
 
 rapleaf.on('error', function(err) {
@@ -48,7 +51,8 @@ rapleaf.on('error', function(err) {
 });
 rapleaf.on('done', function() {
   console.log('rapleaf done!');
+  if (--scrub_done == 0) mailchimp.update();
 });
 
 // Go!
-mailchimp.run();
+mailchimp.fetch();
