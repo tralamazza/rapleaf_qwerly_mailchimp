@@ -4,7 +4,7 @@
   "description": "Integrate with Rapleaf & qwerly with Mailchimp",
   "version": "0.0.1",
   "repository": {
-    "url": ""
+    "url": "https://github.com/tralamazza/rapleaf_qwerly_mailchimp"
   },
   "private": true,
   "main": "index",
