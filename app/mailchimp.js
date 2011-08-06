@@ -137,7 +137,8 @@ Mailchimp.prototype.updateVars = function(utags) {
       }
 
       for (var t in utag.value.tags) { // for each unique field name we have found for this list
-        var t_label = t.substr(1); // remove 1st char
+        var t_label = (t[0] == 'Q' || t[0] == 'R') ? t.substr(1) : t; // remove 1st char
+        var tag_field_type = (t[0] == 'Q' || t == 'gravatar') ? 'url' : 'text'; // qwerly fields/gravatar are URL
         var ntag = normTag(t);
         if (list_vars_tags[ntag] === undefined) {
           list_vars_tags[ntag] = t;
@@ -146,7 +147,7 @@ Mailchimp.prototype.updateVars = function(utags) {
             tag: ntag, // tag
             name: t_label, // label
             options: {
-              field_type: (t[0] == 'Q') ? 'url' : 'text' // qwerly fields are URL
+              field_type: tag_field_type
             }
           }, function(var_add) {
             if (var_add.error) self.emit('error', '@updateVars ' + inspect(var_add.error));
